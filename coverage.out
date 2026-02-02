@@ -1,0 +1,8 @@
+mode: set
+github.com/1saswata/go-mentorship/pkg/geometry/circle.go:12.32,14.2 1 1
+github.com/1saswata/go-mentorship/pkg/geometry/circle.go:15.37,17.2 1 1
+github.com/1saswata/go-mentorship/pkg/geometry/circle.go:19.33,21.2 1 1
+github.com/1saswata/go-mentorship/pkg/geometry/logic.go:3.40,6.2 2 1
+github.com/1saswata/go-mentorship/pkg/geometry/rectangle.go:10.35,12.2 1 1
+github.com/1saswata/go-mentorship/pkg/geometry/rectangle.go:14.40,16.2 1 1
+github.com/1saswata/go-mentorship/pkg/geometry/rectangle.go:18.36,20.2 1 1
