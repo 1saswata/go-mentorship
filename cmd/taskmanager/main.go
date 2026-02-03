@@ -6,10 +6,11 @@ import (
 	"net/http"
 )
 
+func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
+	io.WriteString(w, "OK\n")
+}
 func main() {
-	h1 := func(w http.ResponseWriter, _ *http.Request) {
-		io.WriteString(w, "OK\n")
-	}
-	http.HandleFunc("/health", h1)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	mux := http.NewServeMux()
+	mux.HandleFunc("/health", HealthCheckHandler)
+	log.Fatal(http.ListenAndServe(":8080", mux))
 }
