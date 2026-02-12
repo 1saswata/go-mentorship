@@ -14,4 +14,4 @@ This is a self created go mentorship program where I go from beginner to interme
 ## Current Status
 
 * **Current Week:** 3
-* **Current Task:** CRUD Operations (In-Memory) - Create a thread-safe map to store tasks so you can actually Create, Read, Update, and Delete them.
+* **Current Task:** Create a middleware that logs every request: METHOD PATH - DURATION.
