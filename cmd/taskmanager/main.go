@@ -37,9 +37,10 @@ func (ts *taskServer) ListTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	mux := http.NewServeMux()
+	wrappedMux := LoggingMiddleware(mux)
 	tasks := taskServer{store: NewTaskStore()}
 	mux.HandleFunc("/health", HealthCheckHandler)
 	mux.HandleFunc("GET /tasks", tasks.ListTaskHandler)
 	mux.HandleFunc("POST /tasks", tasks.CreateTaskHandler)
-	log.Fatal(http.ListenAndServe(":8080", mux))
+	log.Fatal(http.ListenAndServe(":8080", wrappedMux))
 }
