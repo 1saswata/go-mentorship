@@ -8,11 +8,16 @@ import (
 
 func checkUrl(url string, wg *sync.WaitGroup) {
 	defer wg.Done()
-	_, err := http.Get(url)
-	if err == nil {
+	resp, err := http.Get(url)
+	if err != nil {
+		log.Printf("%s - DOWN (Network Error)", url)
+		return
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode == http.StatusOK {
 		log.Printf("%s - UP", url)
 	} else {
-		log.Printf("%s - DOWN", url)
+		log.Printf("%s - DOWN (Status: %d)", url, resp.StatusCode)
 	}
 }
 
