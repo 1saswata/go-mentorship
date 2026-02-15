@@ -1,23 +1,24 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"sync"
 )
 
-func checkUrl(url string, wg *sync.WaitGroup) {
+func checkUrl(url string, wg *sync.WaitGroup, results chan string) {
 	defer wg.Done()
 	resp, err := http.Get(url)
 	if err != nil {
-		log.Printf("%s - DOWN (Network Error)", url)
+		results <- fmt.Sprintf("%s - DOWN (Network Error)", url)
 		return
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode == http.StatusOK {
-		log.Printf("%s - UP", url)
+		results <- fmt.Sprintf("%s - UP", url)
 	} else {
-		log.Printf("%s - DOWN (Status: %d)", url, resp.StatusCode)
+		results <- fmt.Sprintf("%s - DOWN (Status: %d)", url, resp.StatusCode)
 	}
 }
 
@@ -28,10 +29,16 @@ func main() {
 		"http://doesntexist.com",
 		"dadsadadw.dawds"}
 	var wg sync.WaitGroup
-
+	results := make(chan string)
 	for _, url := range urls {
 		wg.Add(1)
-		go checkUrl(url, &wg)
+		go checkUrl(url, &wg, results)
 	}
-	wg.Wait()
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
+	for result := range results {
+		log.Print(result)
+	}
 }
