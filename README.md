@@ -14,4 +14,4 @@ This is a self created go mentorship program where I go from beginner to interme
 ## Current Status
 
 * **Current Week:** 4
-* **Current Task:** The Concurrent Website Checker - Create a CLI tool (not a web server) that checks if a list of websites is "UP" or "DOWN".
+* **Current Task:** Channels (Communicating State) - Refactor the site checker to use a chan string to pass results back to main.
