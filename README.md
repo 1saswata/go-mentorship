@@ -14,4 +14,4 @@ This is a self created go mentorship program where I go from beginner to interme
 ## Current Status
 
 * **Current Week:** 4
-* **Current Task:** Channels (Communicating State) - Refactor the site checker to use a chan string to pass results back to main.
+* **Current Task:** Context (The Timeout) - Modify checkUrl to kill the request if it takes longer than 500 milliseconds.
