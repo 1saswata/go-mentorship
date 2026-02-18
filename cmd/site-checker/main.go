@@ -14,25 +14,23 @@ func checkUrl(ctx context.Context, url string, wg *sync.WaitGroup, results chan<
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		results <- fmt.Sprintf("%s - DOWN (Bad Request) %d", url, http.StatusBadRequest)
+		return
 	}
 	resp, err := http.DefaultClient.Do(req)
-	select {
-	case <-ctx.Done():
-		results <- fmt.Sprintf("%s - DOWN (Status: %d)", url, http.StatusRequestTimeout)
-		return
-	default:
-		if err != nil {
-			results <- fmt.Sprintf("%s - DOWN (Network Error)", url)
-			return
-		}
-		defer resp.Body.Close()
-		if resp.StatusCode == http.StatusOK {
-			results <- fmt.Sprintf("%s - UP", url)
+	if err != nil {
+		if ctx.Err() == context.DeadlineExceeded {
+			results <- fmt.Sprintf("%s - DOWN (Status: %d)", url, http.StatusRequestTimeout)
 		} else {
-			results <- fmt.Sprintf("%s - DOWN (Status: %d)", url, resp.StatusCode)
+			results <- fmt.Sprintf("%s - DOWN (Network Error)", url)
 		}
+		return
 	}
-
+	defer resp.Body.Close()
+	if resp.StatusCode == http.StatusOK {
+		results <- fmt.Sprintf("%s - UP", url)
+	} else {
+		results <- fmt.Sprintf("%s - DOWN (Status: %d)", url, resp.StatusCode)
+	}
 }
 
 func main() {
