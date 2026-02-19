@@ -2,32 +2,28 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
+	"log"
 
 	_ "modernc.org/sqlite"
 )
 
-func InitDB() {
+func InitDB() *sql.DB {
 	db, err := sql.Open("sqlite", "./tasks.db")
 	if err != nil {
-		fmt.Println(err)
-		return
+		log.Fatal("Failed to connect to DB:", err)
 	}
-	defer db.Close()
 	err = db.Ping()
 	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Println("DB connected!")
+		log.Fatal("Failed to ping DB:", err)
 	}
-	res, err := db.Exec(`CREATE TABLE IF NOT EXISTS tasks (
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS tasks (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT NOT NULL,
 		status TEXT NOT NULL
 	);`)
 	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Println(res)
+		log.Fatal("Failed to create table:", err)
 	}
+	log.Println("Database initialized successfully!")
+	return db
 }
