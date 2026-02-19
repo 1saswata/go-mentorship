@@ -1,0 +1,42 @@
+# --- Binaries & Executables ---
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+# Main project binary (change 'app' to your binary name if needed)
+app
+# Test binaries built with `go test -c`
+*.test
+
+# --- Coverage & Test Artifacts ---
+# These should NOT be committed
+*.out
+*.coverprofile
+coverage.*
+profile.cov
+
+# --- Databases & Data ---
+# Exclude local database files as discussed
+*.db
+*.sqlite
+*.sqlite3
+
+# --- Environment & Secrets ---
+# Never commit your secrets
+.env
+.env.*
+!.env.example
+
+# --- Dependencies & Workspaces ---
+# Note: DO NOT ignore go.mod and go.sum
+# Only ignore vendor if you aren't using the 'vendor' strategy
+# vendor/
+go.work
+go.work.sum
+
+# --- IDE & System Files ---
+.idea/
+.vscode/
+*.swp
+.DS_Store
