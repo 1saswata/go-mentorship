@@ -36,6 +36,7 @@ func (ts *taskServer) ListTaskHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	InitDB()
 	mux := http.NewServeMux()
 	wrappedMux := LoggingMiddleware(mux)
 	tasks := taskServer{store: NewTaskStore()}

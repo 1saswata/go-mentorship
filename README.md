@@ -13,5 +13,5 @@ This is a self created go mentorship program where I go from beginner to interme
 
 ## Current Status
 
-* **Current Week:** 4
-* **Current Task:** Context (The Timeout) - Modify checkUrl to kill the request if it takes longer than 500 milliseconds.
+* **Current Week:** 5
+* **Current Task:** The Database Connection - Create a database connection and a table for Tasks.
