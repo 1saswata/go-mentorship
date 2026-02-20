@@ -36,10 +36,11 @@ func (ts *taskServer) ListTaskHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	InitDB()
+	db := InitDB()
+	defer db.Close()
 	mux := http.NewServeMux()
 	wrappedMux := LoggingMiddleware(mux)
-	tasks := taskServer{store: NewTaskStore()}
+	tasks := taskServer{store: NewTaskStore(db)}
 	mux.HandleFunc("/health", HealthCheckHandler)
 	mux.HandleFunc("GET /tasks", tasks.ListTaskHandler)
 	mux.HandleFunc("POST /tasks", tasks.CreateTaskHandler)
