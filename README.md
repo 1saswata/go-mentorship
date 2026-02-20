@@ -14,4 +14,4 @@ This is a self created go mentorship program where I go from beginner to interme
 ## Current Status
 
 * **Current Week:** 5
-* **Current Task:** The SQL Store - Refactor store.go to use the database instead of a map and mutex.
+* **Current Task:** Update and Delete - Implement endpoints to update a task's status and to delete a task entirely.
