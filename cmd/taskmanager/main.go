@@ -25,7 +25,11 @@ func (ts *taskServer) CreateTaskHandler(w http.ResponseWriter, r *http.Request) 
 	id := ts.store.CreateTask(t.Name, t.Status)
 	t.ID = id
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
+	if id == -1 {
+		w.WriteHeader(http.StatusInternalServerError)
+	} else {
+		w.WriteHeader(http.StatusCreated)
+	}
 	json.NewEncoder(w).Encode(t)
 }
 

@@ -41,7 +41,7 @@ func (t *TaskStore) GetAllTasks() []Task {
 		return nil
 	}
 	defer rows.Close()
-	var allTasks []Task
+	allTasks := []Task{}
 	for rows.Next() {
 		var t Task
 		if err = rows.Scan(&t.ID, &t.Name, &t.Status); err != nil {
