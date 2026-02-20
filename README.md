@@ -14,4 +14,4 @@ This is a self created go mentorship program where I go from beginner to interme
 ## Current Status
 
 * **Current Week:** 5
-* **Current Task:** The Database Connection - Create a database connection and a table for Tasks.
+* **Current Task:** The SQL Store - Refactor store.go to use the database instead of a map and mutex.

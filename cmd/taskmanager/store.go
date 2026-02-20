@@ -1,6 +1,9 @@
 package main
 
-import "sync"
+import (
+	"database/sql"
+	"log"
+)
 
 type Task struct {
 	ID     int    `json:"id"`
@@ -9,37 +12,43 @@ type Task struct {
 }
 
 type TaskStore struct {
-	sync.Mutex
-	tasks  map[int]Task
-	nextID int
+	db *sql.DB
 }
 
-func NewTaskStore() *TaskStore {
-	return &TaskStore{
-		tasks:  make(map[int]Task),
-		nextID: 1,
-	}
+func NewTaskStore(db *sql.DB) *TaskStore {
+	return &TaskStore{db: db}
 }
 
 func (t *TaskStore) CreateTask(name, status string) int {
-	t.Lock()
-	defer t.Unlock()
-	task := Task{
-		ID:     t.nextID,
-		Name:   name,
-		Status: status,
+	query := "INSERT INTO tasks (name, status) VALUES (?, ?)"
+	result, err := t.db.Exec(query, name, status)
+	if err != nil {
+		log.Println("Error inserting task:", err)
+		return -1
 	}
-	t.tasks[t.nextID] = task
-	t.nextID++
-	return task.ID
+	id, err := result.LastInsertId()
+	if err != nil {
+		log.Println("Error getting id:", err)
+		return -1
+	}
+	return int(id)
 }
 
 func (t *TaskStore) GetAllTasks() []Task {
-	t.Lock()
-	defer t.Unlock()
-	allTasks := make([]Task, 0, len(t.tasks))
-	for _, task := range t.tasks {
-		allTasks = append(allTasks, task)
+	rows, err := t.db.Query("Select id, name, status from tasks")
+	if err != nil {
+		log.Println("Error getting tasks:", err)
+		return nil
+	}
+	defer rows.Close()
+	var allTasks []Task
+	for rows.Next() {
+		var t Task
+		if err = rows.Scan(&t.ID, &t.Name, &t.Status); err != nil {
+			log.Println("Error scanning row: ", err)
+			continue
+		}
+		allTasks = append(allTasks, t)
 	}
 	return allTasks
 }
