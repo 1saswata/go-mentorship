@@ -52,3 +52,15 @@ func (t *TaskStore) GetAllTasks() []Task {
 	}
 	return allTasks
 }
+
+func (t *TaskStore) UpdateTaskStatus(id int, status string) error {
+	query := "UPDATE tasks SET status = ? WHERE id = ?"
+	_, err := t.db.Exec(query, status, id) //Maybe we need to check if rows are actually getting Updated?
+	return err
+}
+
+func (t *TaskStore) DeleteTask(id int) error {
+	query := "DELETE FROM tasks WHERE id = ?"
+	_, err := t.db.Exec(query, id) //Maybe we need to check if rows are actually getting deleted?
+	return err
+}
