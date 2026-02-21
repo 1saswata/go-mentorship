@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"io"
 	"log"
@@ -30,8 +31,8 @@ func (ts *taskServer) CreateTaskHandler(w http.ResponseWriter, r *http.Request) 
 		w.WriteHeader(http.StatusInternalServerError)
 	} else {
 		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(t)
 	}
-	json.NewEncoder(w).Encode(t)
 }
 
 func (ts *taskServer) ListTaskHandler(w http.ResponseWriter, r *http.Request) {
@@ -50,9 +51,14 @@ func (ts *taskServer) UpdateTaskHandler(w http.ResponseWriter, r *http.Request) 
 	err = json.NewDecoder(r.Body).Decode(&t)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 	err = ts.store.UpdateTaskStatus(id, t.Status)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -67,6 +73,10 @@ func (ts *taskServer) DeleteTaskHandler(w http.ResponseWriter, r *http.Request) 
 	}
 	err = ts.store.DeleteTask(id)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

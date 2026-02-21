@@ -55,12 +55,26 @@ func (t *TaskStore) GetAllTasks() []Task {
 
 func (t *TaskStore) UpdateTaskStatus(id int, status string) error {
 	query := "UPDATE tasks SET status = ? WHERE id = ?"
-	_, err := t.db.Exec(query, status, id) //Maybe we need to check if rows are actually getting Updated?
+	result, err := t.db.Exec(query, status, id)
+	if err != nil {
+		return err
+	}
+	rows, err := result.RowsAffected()
+	if rows == 0 {
+		return sql.ErrNoRows
+	}
 	return err
 }
 
 func (t *TaskStore) DeleteTask(id int) error {
 	query := "DELETE FROM tasks WHERE id = ?"
-	_, err := t.db.Exec(query, id) //Maybe we need to check if rows are actually getting deleted?
+	result, err := t.db.Exec(query, id)
+	if err != nil {
+		return err
+	}
+	rows, err := result.RowsAffected()
+	if rows == 0 {
+		return sql.ErrNoRows
+	}
 	return err
 }
