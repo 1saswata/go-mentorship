@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 type taskServer struct {
@@ -39,6 +40,39 @@ func (ts *taskServer) ListTaskHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(tasks)
 }
 
+func (ts *taskServer) UpdateTaskHandler(w http.ResponseWriter, r *http.Request) {
+	var t Task
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	err = json.NewDecoder(r.Body).Decode(&t)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+	err = ts.store.UpdateTaskStatus(id, t.Status)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (ts *taskServer) DeleteTaskHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	err = ts.store.DeleteTask(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func main() {
 	db := InitDB()
 	defer db.Close()
@@ -48,5 +82,7 @@ func main() {
 	mux.HandleFunc("/health", HealthCheckHandler)
 	mux.HandleFunc("GET /tasks", tasks.ListTaskHandler)
 	mux.HandleFunc("POST /tasks", tasks.CreateTaskHandler)
+	mux.HandleFunc("PUT /tasks/{id}", tasks.UpdateTaskHandler)
+	mux.HandleFunc("DELETE /tasks/{id}", tasks.DeleteTaskHandler)
 	log.Fatal(http.ListenAndServe(":8080", wrappedMux))
 }
