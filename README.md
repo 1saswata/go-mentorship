@@ -13,5 +13,5 @@ This is a self created go mentorship program where I go from beginner to interme
 
 ## Current Status
 
-* **Current Week:** 5
-* **Current Task:** Update and Delete - Implement endpoints to update a task's status and to delete a task entirely.
+* **Current Week:** 6
+* **Current Task:** Graceful Shutdown - Intercept the operating system's shutdown signal (SIGINT or SIGTERM). When received, tell the HTTP server to stop accepting new requests, but give it 5 seconds to finish processing active requests before shutting down completely. Finally, close the database connection.
