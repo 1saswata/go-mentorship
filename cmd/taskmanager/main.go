@@ -102,7 +102,9 @@ func main() {
 	newServer := http.Server{Addr: ":8080", Handler: wrappedMux}
 	c := make(chan os.Signal, 1)
 	go func() {
-		log.Fatal(newServer.ListenAndServe())
+		if err := newServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatal("HTTP Server error : ", err)
+		}
 	}()
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	<-c
@@ -113,4 +115,5 @@ func main() {
 	if err != nil {
 		log.Fatal("Error shutting down the server: ", err)
 	}
+	log.Print("Server is closed.")
 }
