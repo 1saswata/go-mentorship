@@ -1,12 +1,17 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"io"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
+	"time"
 )
 
 type taskServer struct {
@@ -94,5 +99,18 @@ func main() {
 	mux.HandleFunc("POST /tasks", tasks.CreateTaskHandler)
 	mux.HandleFunc("PUT /tasks/{id}", tasks.UpdateTaskHandler)
 	mux.HandleFunc("DELETE /tasks/{id}", tasks.DeleteTaskHandler)
-	log.Fatal(http.ListenAndServe(":8080", wrappedMux))
+	newServer := http.Server{Addr: ":8080", Handler: wrappedMux}
+	c := make(chan os.Signal, 1)
+	go func() {
+		log.Fatal(newServer.ListenAndServe())
+	}()
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	<-c
+	log.Println("Shutting down server...")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	err := newServer.Shutdown(ctx)
+	if err != nil {
+		log.Fatal("Error shutting down the server: ", err)
+	}
 }
