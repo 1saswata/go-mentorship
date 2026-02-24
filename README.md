@@ -1,17 +1,18 @@
-# go-mentorship
+# go-mentorship - Phase 2
 
-This is a self created go mentorship program where I go from beginner to intermediate stage. I follow all the best practices and ask gemini to review my code throughout the program.
+This is a self created go mentorship program where I go from beginner to intermediate stage. I follow all the best practices and ask gemini to review my code throughout the program. (Check phase1_README for beginning of the project)
 
 ## The 6-Week Roadmap
 
-* **Week 1: Structure & Interfaces.** Focus: Standard layout (`cmd`, `pkg`, `internal`), decoupling code. *Assignment: Shape Calculator Refactor.*
-* **Week 2: Professional Testing.** Focus: Table-driven tests, 90% coverage, Mocking. *Assignment: Calculator Tests.*
-* **Week 3: The Backend (Stdlib).** Focus: `net/http`, Context, JSON, Middleware (No frameworks allowed). *Assignment: CRUD Task Manager.*
-* **Week 4: Concurrency Patterns.** Focus: Channels, Worker Pools, Graceful Shutdown. *Assignment: Concurrent URL Downloader.*
-* **Week 5: Persistence.** Focus: SQL, Repository Pattern, Database Drivers. *Assignment: DB-backed Task Manager.*
-* **Week 6: Capstone Project.** Focus: Docker, Makefiles, Production readiness. *Assignment: URL Shortener Service.*
+* **Week 1: Enterprise Architecture & HTTP Testing.** Focus: Migrating from a monolithic `cmd/` to the standard `internal/` layout. Introduction to `net/http/httptest` for testing handlers without starting a server. *Assignment: The Great Migration & Health Check Test.*
+* **Week 2: Interfaces & Database Mocking.** Focus: Dependency injection at scale. Creating a `Store` interface so we can test HTTP handlers using a mock in-memory database instead of the real SQLite file. *Assignment: 100% Handler Test Coverage.*
+* **Week 3: Containerization (DevOps Foundation).** Focus: Writing `Dockerfile` and `docker-compose.yml` optimized for WSL2 environments. Creating a `Makefile` to standardize build/run/test commands. *Assignment: Dockerized Task Manager.*
+* **Week 4: CI/CD & Production Polish.** Focus: GitHub Actions. Automating tests and linting on every push. Upgrading `log` to the structured `log/slog` package. *Assignment: The Deployment Pipeline.*
+* **Week 5: Event-Driven Architecture (WebSockets).** Focus: Upgrading HTTP connections. Implementing the `gorilla/websocket` package to allow bidirectional communication. *Assignment: The WebSocket Handshake & Client Hub.*
+* **Week 6: Real-Time Systems.** Focus: Concurrency at scale. Broadcasting state changes (Task creations/updates) to all connected clients instantly. *Assignment: Real-Time Task Board.*
+
 
 ## Current Status
 
-* **Current Week:** 6
+* **Current Week:** 1
 * **Current Task:** Graceful Shutdown - Intercept the operating system's shutdown signal (SIGINT or SIGTERM). When received, tell the HTTP server to stop accepting new requests, but give it 5 seconds to finish processing active requests before shutting down completely. Finally, close the database connection.
