@@ -15,4 +15,4 @@ This is a self created go mentorship program where I go from beginner to interme
 ## Current Status
 
 * **Current Week:** 1
-* **Current Task:** Graceful Shutdown - Intercept the operating system's shutdown signal (SIGINT or SIGTERM). When received, tell the HTTP server to stop accepting new requests, but give it 5 seconds to finish processing active requests before shutting down completely. Finally, close the database connection.
+* **Current Task:** Introduction to httptest - Write a unit test that verifies HealthCheckHandler returns a 200 OK status code and the string "OK\n".
