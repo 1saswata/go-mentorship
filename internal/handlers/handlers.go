@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"database/sql"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -18,7 +17,6 @@ type Store interface {
 }
 
 type TaskServer struct {
-	//is the naming for Store here idomatic?
 	Store Store
 }
 
@@ -64,7 +62,7 @@ func (ts *TaskServer) UpdateTaskHandler(w http.ResponseWriter, r *http.Request) 
 	}
 	err = ts.Store.UpdateTaskStatus(id, t.Status)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if err == store.ErrNotFound {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -82,7 +80,7 @@ func (ts *TaskServer) DeleteTaskHandler(w http.ResponseWriter, r *http.Request) 
 	}
 	err = ts.Store.DeleteTask(id)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if err == store.ErrNotFound {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
