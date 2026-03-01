@@ -10,8 +10,16 @@ import (
 	"github.com/1saswata/go-mentorship/internal/store"
 )
 
+type Store interface {
+	CreateTask(string, string) int
+	GetAllTasks() []store.Task
+	UpdateTaskStatus(int, string) error
+	DeleteTask(int) error
+}
+
 type TaskServer struct {
-	Store *store.TaskStore
+	//is the naming for Store here idomatic?
+	Store Store
 }
 
 func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {

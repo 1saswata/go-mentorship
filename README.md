@@ -14,5 +14,5 @@ This is a self created go mentorship program where I go from beginner to interme
 
 ## Current Status
 
-* **Current Week:** 1
-* **Current Task:** Introduction to httptest - Write a unit test that verifies HealthCheckHandler returns a 200 OK status code and the string "OK\n".
+* **Current Week:** 2
+* **Current Task:** Interfaces & Decoupling - Decouple handlers.go from the concrete implementation of the SQLite database using an interface.
