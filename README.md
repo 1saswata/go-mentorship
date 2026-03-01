@@ -15,4 +15,4 @@ This is a self created go mentorship program where I go from beginner to interme
 ## Current Status
 
 * **Current Week:** 2
-* **Current Task:** Interfaces & Decoupling - Decouple handlers.go from the concrete implementation of the SQLite database using an interface.
+* **Current Task:** The Mock Database - Write a unit test for ListTaskHandler using a mock store and httptest.

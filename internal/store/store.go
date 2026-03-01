@@ -2,8 +2,11 @@ package store
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 )
+
+var ErrNotFound = errors.New("Task not found")
 
 type Task struct {
 	ID     int    `json:"id"`
@@ -61,7 +64,7 @@ func (t *TaskStore) UpdateTaskStatus(id int, status string) error {
 	}
 	rows, err := result.RowsAffected()
 	if rows == 0 {
-		return sql.ErrNoRows
+		return ErrNotFound
 	}
 	return err
 }
@@ -74,7 +77,7 @@ func (t *TaskStore) DeleteTask(id int) error {
 	}
 	rows, err := result.RowsAffected()
 	if rows == 0 {
-		return sql.ErrNoRows
+		return ErrNotFound
 	}
 	return err
 }
