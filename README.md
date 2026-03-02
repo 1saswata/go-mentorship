@@ -15,4 +15,4 @@ This is a self created go mentorship program where I go from beginner to interme
 ## Current Status
 
 * **Current Week:** 2
-* **Current Task:** The Mock Database - Write a unit test for ListTaskHandler using a mock store and httptest.
+* **Current Task:** 100% Handler Coverage - Write unit tests for CreateTaskHandler, UpdateTaskHandler, and DeleteTaskHandler.
