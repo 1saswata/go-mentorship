@@ -63,7 +63,7 @@ func (ts *TaskServer) UpdateTaskHandler(w http.ResponseWriter, r *http.Request) 
 	err = ts.Store.UpdateTaskStatus(id, t.Status)
 	if err != nil {
 		if err == store.ErrNotFound {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -81,7 +81,7 @@ func (ts *TaskServer) DeleteTaskHandler(w http.ResponseWriter, r *http.Request) 
 	err = ts.Store.DeleteTask(id)
 	if err != nil {
 		if err == store.ErrNotFound {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
 		http.Error(w, err.Error(), http.StatusInternalServerError)
