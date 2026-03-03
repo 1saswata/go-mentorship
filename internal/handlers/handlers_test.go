@@ -65,3 +65,67 @@ func TestListTaskHandler(t *testing.T) {
 		}
 	})
 }
+
+func TestCreateTaskHandler(t *testing.T) {
+	t.Run("Happy Path", func(t *testing.T) {
+		server := TaskServer{Store: mockStore{}}
+		req := httptest.NewRequest(http.MethodPost, "/tasks",
+			strings.NewReader(`{"name":"Test","status":"TODO"}`))
+		res := httptest.NewRecorder()
+		server.CreateTaskHandler(res, req)
+		wantCode := http.StatusCreated
+		wantBody := "Test"
+		gotCode := res.Code
+		gotBody := res.Body.String()
+		if wantCode != gotCode {
+			t.Errorf("want: %d , got: %d", wantCode, gotCode)
+		}
+		if !strings.Contains(gotBody, wantBody) {
+			t.Errorf("want %s, got %s", wantBody, gotBody)
+		}
+	})
+
+	t.Run("Invalid Json", func(t *testing.T) {
+		server := TaskServer{Store: mockStore{}}
+		req := httptest.NewRequest(http.MethodPost, "/tasks",
+			strings.NewReader(`{"name""Broken Json","status":"TODO"}`))
+		res := httptest.NewRecorder()
+		server.CreateTaskHandler(res, req)
+		wantCode := http.StatusBadRequest
+		gotCode := res.Code
+		if wantCode != gotCode {
+			t.Errorf("want: %d , got: %d", wantCode, gotCode)
+		}
+	})
+}
+
+func TestUpdateTaskHandler(t *testing.T) {
+	t.Run("Update Success", func(t *testing.T) {
+		server := TaskServer{Store: mockStore{}}
+		req := httptest.NewRequest(http.MethodPut, "/tasks",
+			strings.NewReader(`{"status":"Complete"}`))
+		req.SetPathValue("id", "1")
+		res := httptest.NewRecorder()
+		server.UpdateTaskHandler(res, req)
+		got := res.Code
+		want := http.StatusNoContent
+		if got != want {
+			t.Errorf("got %d want %d", got, want)
+		}
+	})
+}
+
+func TestDeleteTaskHandler(t *testing.T) {
+	t.Run("Delete Success", func(t *testing.T) {
+		server := TaskServer{Store: mockStore{}}
+		req := httptest.NewRequest(http.MethodDelete, "/tasks", nil)
+		req.SetPathValue("id", "1")
+		res := httptest.NewRecorder()
+		server.DeleteTaskHandler(res, req)
+		want := http.StatusNoContent
+		got := res.Code
+		if want != got {
+			t.Errorf("want %d got %d", want, got)
+		}
+	})
+}
