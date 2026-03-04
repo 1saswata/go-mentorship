@@ -1,20 +1,26 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 	"net/http/httptest"
-	"testing"
-
+	"strconv"
 	"strings"
+	"testing"
 
 	"github.com/1saswata/go-mentorship/internal/store"
 )
 
 type mockStore struct {
+	err error
 }
 
 func (m mockStore) CreateTask(name, status string) int {
-	return 1
+	if m.err == nil {
+		return 1
+	} else {
+		return -1
+	}
 }
 
 func (m mockStore) GetAllTasks() []store.Task {
@@ -22,11 +28,11 @@ func (m mockStore) GetAllTasks() []store.Task {
 }
 
 func (m mockStore) UpdateTaskStatus(id int, status string) error {
-	return nil
+	return m.err
 }
 
 func (m mockStore) DeleteTask(id int) error {
-	return nil
+	return m.err
 }
 
 func TestHealthCheckHandler(t *testing.T) {
@@ -67,65 +73,106 @@ func TestListTaskHandler(t *testing.T) {
 }
 
 func TestCreateTaskHandler(t *testing.T) {
-	t.Run("Happy Path", func(t *testing.T) {
-		server := TaskServer{Store: mockStore{}}
-		req := httptest.NewRequest(http.MethodPost, "/tasks",
-			strings.NewReader(`{"name":"Test","status":"TODO"}`))
-		res := httptest.NewRecorder()
-		server.CreateTaskHandler(res, req)
-		wantCode := http.StatusCreated
-		wantBody := "Test"
-		gotCode := res.Code
-		gotBody := res.Body.String()
-		if wantCode != gotCode {
-			t.Errorf("want: %d , got: %d", wantCode, gotCode)
-		}
-		if !strings.Contains(gotBody, wantBody) {
-			t.Errorf("want %s, got %s", wantBody, gotBody)
-		}
-	})
+	tests := []struct {
+		name     string
+		err      error
+		reqBody  string
+		wantCode int
+		wantBody string
+	}{
+		{name: "Task created", err: nil, reqBody: `{"name":"Test","status":"TODO"}`,
+			wantCode: http.StatusCreated, wantBody: "Test"},
+		{name: "Invalid Json", err: nil, reqBody: `{"name""Broken Json","status":"TODO"}`,
+			wantCode: http.StatusBadRequest, wantBody: ""},
+		{name: "Task not created", err: errors.New("db down"),
+			reqBody: `{"name":"Test","status":"TODO"}`, wantCode: http.StatusInternalServerError, wantBody: ""},
+	}
 
-	t.Run("Invalid Json", func(t *testing.T) {
-		server := TaskServer{Store: mockStore{}}
-		req := httptest.NewRequest(http.MethodPost, "/tasks",
-			strings.NewReader(`{"name""Broken Json","status":"TODO"}`))
-		res := httptest.NewRecorder()
-		server.CreateTaskHandler(res, req)
-		wantCode := http.StatusBadRequest
-		gotCode := res.Code
-		if wantCode != gotCode {
-			t.Errorf("want: %d , got: %d", wantCode, gotCode)
-		}
-	})
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			server := TaskServer{Store: mockStore{err: tt.err}}
+			req := httptest.NewRequest(http.MethodPost, "/tasks",
+				strings.NewReader(tt.reqBody))
+			res := httptest.NewRecorder()
+			server.CreateTaskHandler(res, req)
+			gotCode := res.Code
+			gotBody := res.Body.String()
+			if tt.wantCode != gotCode {
+				t.Errorf("want: %d , got: %d", tt.wantCode, gotCode)
+			}
+			if !strings.Contains(gotBody, tt.wantBody) {
+				t.Errorf("want %s, got %s", tt.wantBody, gotBody)
+			}
+		})
+	}
 }
 
 func TestUpdateTaskHandler(t *testing.T) {
-	t.Run("Update Success", func(t *testing.T) {
-		server := TaskServer{Store: mockStore{}}
-		req := httptest.NewRequest(http.MethodPut, "/tasks",
-			strings.NewReader(`{"status":"Complete"}`))
-		req.SetPathValue("id", "1")
-		res := httptest.NewRecorder()
-		server.UpdateTaskHandler(res, req)
-		got := res.Code
-		want := http.StatusNoContent
-		if got != want {
-			t.Errorf("got %d want %d", got, want)
-		}
-	})
+	tests := []struct {
+		name    string
+		id      int
+		err     error
+		reqBody string
+		want    int
+	}{
+		{name: "Update Success", id: 1, err: nil, reqBody: `{"status":"Complete"}`,
+			want: http.StatusNoContent},
+		{name: "Update No ID", id: -1, err: nil, reqBody: `{"status":"Complete"}`,
+			want: http.StatusBadRequest},
+		{name: "Update Fail - Not found", id: 1, err: store.ErrNotFound, reqBody: `{"status":"Complete"}`,
+			want: http.StatusNotFound},
+		{name: "Update Fail - Bad body", id: 1, err: nil, reqBody: `{"status""Complete"}`,
+			want: http.StatusBadRequest},
+		{name: "Update Fail - DB error", id: 1, err: errors.New("db down"), reqBody: `{"status":"Complete"}`,
+			want: http.StatusInternalServerError},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			server := TaskServer{Store: mockStore{err: tt.err}}
+			req := httptest.NewRequest(http.MethodPut, "/tasks",
+				strings.NewReader(tt.reqBody))
+			if tt.id != -1 {
+				req.SetPathValue("id", strconv.Itoa(tt.id))
+			}
+			res := httptest.NewRecorder()
+			server.UpdateTaskHandler(res, req)
+			got := res.Code
+			if got != tt.want {
+				t.Errorf("got %d want %d", got, tt.want)
+			}
+		})
+	}
 }
 
 func TestDeleteTaskHandler(t *testing.T) {
-	t.Run("Delete Success", func(t *testing.T) {
-		server := TaskServer{Store: mockStore{}}
-		req := httptest.NewRequest(http.MethodDelete, "/tasks", nil)
-		req.SetPathValue("id", "1")
-		res := httptest.NewRecorder()
-		server.DeleteTaskHandler(res, req)
-		want := http.StatusNoContent
-		got := res.Code
-		if want != got {
-			t.Errorf("want %d got %d", want, got)
-		}
-	})
+	tests := []struct {
+		name string
+		id   int
+		err  error
+		want int
+	}{
+		{name: "Delete Success", id: 1, err: nil,
+			want: http.StatusNoContent},
+		{name: "Delete No ID", id: -1, err: nil,
+			want: http.StatusBadRequest},
+		{name: "Update Fail - DB error", id: 1, err: errors.New("DB Error"),
+			want: http.StatusInternalServerError},
+		{name: "Update Fail - Not found", id: 1, err: store.ErrNotFound,
+			want: http.StatusNotFound},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			server := TaskServer{Store: mockStore{err: tt.err}}
+			req := httptest.NewRequest(http.MethodDelete, "/tasks", nil)
+			if tt.id != -1 {
+				req.SetPathValue("id", strconv.Itoa(tt.id))
+			}
+			res := httptest.NewRecorder()
+			server.DeleteTaskHandler(res, req)
+			got := res.Code
+			if tt.want != got {
+				t.Errorf("want %d got %d", tt.want, got)
+			}
+		})
+	}
 }
