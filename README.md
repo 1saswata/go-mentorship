@@ -15,4 +15,4 @@ This is a self created go mentorship program where I go from beginner to interme
 ## Current Status
 
 * **Current Week:** 2
-* **Current Task:** 100% Handler Coverage - Write unit tests for CreateTaskHandler, UpdateTaskHandler, and DeleteTaskHandler.
+* **Current Task:** The Smarter Mock - Achieve >90% test coverage by testing 404 Not Found and 500 Internal Server Error scenarios.
