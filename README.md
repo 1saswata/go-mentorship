@@ -14,5 +14,5 @@ This is a self created go mentorship program where I go from beginner to interme
 
 ## Current Status
 
-* **Current Week:** 2
-* **Current Task:** The Smarter Mock - Achieve >90% test coverage by testing 404 Not Found and 500 Internal Server Error scenarios.
+* **Current Week:** 3
+* **Current Task:** Containerization - Create a production-ready Dockerfile that builds your Go binary and packages it into a tiny, secure container.
