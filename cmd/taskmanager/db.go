@@ -3,12 +3,15 @@ package main
 import (
 	"database/sql"
 	"log"
+	"os"
 
 	_ "modernc.org/sqlite"
 )
 
 func InitDB() *sql.DB {
-	db, err := sql.Open("sqlite", "./tasks.db")
+	dbPath := os.Getenv("DB_PATH")
+	dbPath += "./tasks.db"
+	db, err := sql.Open("sqlite", dbPath)
 	if err != nil {
 		log.Fatal("Failed to connect to DB:", err)
 	}

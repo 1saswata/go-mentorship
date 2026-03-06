@@ -15,4 +15,6 @@ This is a self created go mentorship program where I go from beginner to interme
 ## Current Status
 
 * **Current Week:** 3
-* **Current Task:** Containerization - Create a production-ready Dockerfile that builds your Go binary and packages it into a tiny, secure container.
+* **Current Task:** Compose & Make - 1. Map a Docker Volume so your SQLite database survives container restarts.
+
+2. Create a Makefile to turn long commands into simple, memorable shortcuts.
