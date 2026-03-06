@@ -4,13 +4,13 @@ import (
 	"database/sql"
 	"log"
 	"os"
+	"path/filepath"
 
 	_ "modernc.org/sqlite"
 )
 
 func InitDB() *sql.DB {
-	dbPath := os.Getenv("DB_PATH")
-	dbPath += "./tasks.db"
+	dbPath := filepath.Join(os.Getenv("DB_PATH"), "tasks.db")
 	db, err := sql.Open("sqlite", dbPath)
 	if err != nil {
 		log.Fatal("Failed to connect to DB:", err)
