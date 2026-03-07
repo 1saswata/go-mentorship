@@ -11,6 +11,6 @@ func LoggingMiddleware(h http.Handler) http.Handler {
 		start := time.Now()
 		h.ServeHTTP(w, r)
 		total := time.Since(start)
-		slog.Info("Incoming request", "method", r.Method, "path", r.URL, "duration_ms", total)
+		slog.Info("Incoming request", "method", r.Method, "path", r.URL.Path, "duration", total.String())
 	})
 }
