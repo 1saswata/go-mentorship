@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -15,6 +15,8 @@ import (
 )
 
 func main() {
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	slog.SetDefault(logger)
 	db := InitDB()
 	defer db.Close()
 	mux := http.NewServeMux()
@@ -29,17 +31,19 @@ func main() {
 	c := make(chan os.Signal, 1)
 	go func() {
 		if err := newServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatal("HTTP Server error : ", err)
+			slog.Error("HTTP Server error:", "Error", err)
+			os.Exit(1)
 		}
 	}()
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	<-c
-	log.Println("Shutting down server...")
+	slog.Info("Shutting down server...")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	err := newServer.Shutdown(ctx)
 	if err != nil {
-		log.Fatal("Error shutting down the server: ", err)
+		slog.Error("Error shutting down the server", "Error", err)
+		os.Exit(1)
 	}
-	log.Print("Server is closed.")
+	slog.Info("Server is closed.")
 }
