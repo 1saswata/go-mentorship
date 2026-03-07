@@ -15,4 +15,4 @@ This is a self created go mentorship program where I go from beginner to interme
 ## Current Status
 
 * **Current Week:** 4
-* **Current Task:** Structured Logging (log/slog) - Replace all instances of the standard log package with log/slog. Configure the application to output logs in JSON format.
+* **Current Task:** The CI Pipeline - Create a GitHub Actions workflow that automatically sets up Go and runs your test suite every time you push to the main branch.
