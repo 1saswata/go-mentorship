@@ -21,7 +21,7 @@ type TaskServer struct {
 }
 
 func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
-	io.WriteString(w, "OK\n")
+	_, _ = io.WriteString(w, "OK\n")
 }
 
 func (ts *TaskServer) CreateTaskHandler(w http.ResponseWriter, r *http.Request) {
@@ -38,14 +38,14 @@ func (ts *TaskServer) CreateTaskHandler(w http.ResponseWriter, r *http.Request) 
 		w.WriteHeader(http.StatusInternalServerError)
 	} else {
 		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(t)
+		_ = json.NewEncoder(w).Encode(t)
 	}
 }
 
 func (ts *TaskServer) ListTaskHandler(w http.ResponseWriter, r *http.Request) {
 	tasks := ts.Store.GetAllTasks()
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(tasks)
+	_ = json.NewEncoder(w).Encode(tasks)
 }
 
 func (ts *TaskServer) UpdateTaskHandler(w http.ResponseWriter, r *http.Request) {
