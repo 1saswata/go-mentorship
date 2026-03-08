@@ -43,7 +43,7 @@ func (t *TaskStore) GetAllTasks() []Task {
 		log.Println("Error getting tasks:", err)
 		return nil
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	allTasks := []Task{}
 	for rows.Next() {
 		var t Task
