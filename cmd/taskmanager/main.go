@@ -18,7 +18,7 @@ func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	slog.SetDefault(logger)
 	db := InitDB()
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 	mux := http.NewServeMux()
 	wrappedMux := middleware.LoggingMiddleware(mux)
 	tasks := handlers.TaskServer{Store: store.NewTaskStore(db)}

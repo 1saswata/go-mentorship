@@ -25,7 +25,7 @@ func checkUrl(ctx context.Context, url string, wg *sync.WaitGroup, results chan<
 		}
 		return
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode == http.StatusOK {
 		results <- fmt.Sprintf("%s - UP", url)
 	} else {
