@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/1saswata/go-mentorship/internal/store"
+	"github.com/gorilla/websocket"
 )
 
 type Store interface {
@@ -18,6 +19,11 @@ type Store interface {
 
 type TaskServer struct {
 	Store Store
+}
+
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
 }
 
 func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
@@ -88,4 +94,26 @@ func (ts *TaskServer) DeleteTaskHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func (ts *TaskServer) WebSocketHandler(w http.ResponseWriter, r *http.Request) {
+	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	for {
+		mt, p, err := conn.ReadMessage()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			break
+		}
+		err = conn.WriteMessage(mt, p)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			break
+		}
+	}
+	_ = conn.Close()
 }

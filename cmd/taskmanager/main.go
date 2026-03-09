@@ -27,6 +27,7 @@ func main() {
 	mux.HandleFunc("POST /tasks", tasks.CreateTaskHandler)
 	mux.HandleFunc("PUT /tasks/{id}", tasks.UpdateTaskHandler)
 	mux.HandleFunc("DELETE /tasks/{id}", tasks.DeleteTaskHandler)
+	mux.HandleFunc("GET /ws", tasks.WebSocketHandler)
 	newServer := http.Server{Addr: ":8080", Handler: wrappedMux}
 	c := make(chan os.Signal, 1)
 	go func() {

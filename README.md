@@ -14,5 +14,5 @@ This is a self created go mentorship program where I go from beginner to interme
 
 ## Current Status
 
-* **Current Week:** 4
-* **Current Task:** The CI Pipeline - Create a GitHub Actions workflow that automatically sets up Go and runs your test suite every time you push to the main branch.
+* **Current Week:** 5
+* **Current Task:** The Handshake & The Echo - Create a new endpoint (GET /ws) that upgrades the HTTP connection to a WebSocket connection, listens for a text message from the client, and immediately echoes it back.
