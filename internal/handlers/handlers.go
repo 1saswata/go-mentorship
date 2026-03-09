@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"io"
+	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -24,6 +25,7 @@ type TaskServer struct {
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
+	CheckOrigin:     func(r *http.Request) bool { return true },
 }
 
 func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
@@ -97,7 +99,6 @@ func (ts *TaskServer) DeleteTaskHandler(w http.ResponseWriter, r *http.Request) 
 }
 
 func (ts *TaskServer) WebSocketHandler(w http.ResponseWriter, r *http.Request) {
-	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -106,12 +107,12 @@ func (ts *TaskServer) WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 	for {
 		mt, p, err := conn.ReadMessage()
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			slog.Error("Websocket error", "err", err)
 			break
 		}
 		err = conn.WriteMessage(mt, p)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			slog.Error("Websocket error", "err", err)
 			break
 		}
 	}
