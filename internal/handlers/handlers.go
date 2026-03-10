@@ -48,7 +48,7 @@ func (h *Hub) Run() {
 		msg := <-h.broadcast
 		h.Lock()
 		for c := range h.clients {
-			c.WriteMessage(websocket.TextMessage, msg)
+			_ = c.WriteMessage(websocket.TextMessage, msg)
 		}
 		h.Unlock()
 	}
@@ -139,7 +139,6 @@ func (ts *TaskServer) WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 		delete(ts.H.clients, conn)
 		ts.H.Unlock()
 	}()
-	go ts.H.Run()
 	for {
 		_, p, err := conn.ReadMessage()
 		if err != nil {
