@@ -15,4 +15,4 @@ This is a self created go mentorship program where I go from beginner to interme
 ## Current Status
 
 * **Current Week:** 5
-* **Current Task:** The Handshake & The Echo - Create a new endpoint (GET /ws) that upgrades the HTTP connection to a WebSocket connection, listens for a text message from the client, and immediately echoes it back.
+* **Current Task:** The Broadcast Hub - Create a thread-safe Hub that registers clients and broadcasts incoming messages to all connected clients.

@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 	"strconv"
+	"sync"
 
 	"github.com/1saswata/go-mentorship/internal/store"
 	"github.com/gorilla/websocket"
@@ -20,12 +21,37 @@ type Store interface {
 
 type TaskServer struct {
 	Store Store
+	H     *Hub
 }
 
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
 	CheckOrigin:     func(r *http.Request) bool { return true },
+}
+
+type Hub struct {
+	clients   map[*websocket.Conn]bool
+	broadcast chan []byte
+	sync.RWMutex
+}
+
+func NewHub() *Hub {
+	return &Hub{
+		clients:   make(map[*websocket.Conn]bool),
+		broadcast: make(chan []byte),
+	}
+}
+
+func (h *Hub) Run() {
+	for {
+		msg := <-h.broadcast
+		h.Lock()
+		for c := range h.clients {
+			c.WriteMessage(websocket.TextMessage, msg)
+		}
+		h.Unlock()
+	}
 }
 
 func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
@@ -104,17 +130,22 @@ func (ts *TaskServer) WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	ts.H.Lock()
+	ts.H.clients[conn] = true
+	ts.H.Unlock()
+	defer func() {
+		_ = conn.Close()
+		ts.H.Lock()
+		delete(ts.H.clients, conn)
+		ts.H.Unlock()
+	}()
+	go ts.H.Run()
 	for {
-		mt, p, err := conn.ReadMessage()
+		_, p, err := conn.ReadMessage()
 		if err != nil {
 			slog.Error("Websocket error", "err", err)
 			break
 		}
-		err = conn.WriteMessage(mt, p)
-		if err != nil {
-			slog.Error("Websocket error", "err", err)
-			break
-		}
+		ts.H.broadcast <- p
 	}
-	_ = conn.Close()
 }
