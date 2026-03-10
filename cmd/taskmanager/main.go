@@ -21,7 +21,7 @@ func main() {
 	defer func() { _ = db.Close() }()
 	mux := http.NewServeMux()
 	wrappedMux := middleware.LoggingMiddleware(mux)
-	tasks := handlers.TaskServer{Store: store.NewTaskStore(db)}
+	tasks := handlers.TaskServer{Store: store.NewTaskStore(db), H: handlers.NewHub()}
 	mux.HandleFunc("/health", handlers.HealthCheckHandler)
 	mux.HandleFunc("GET /tasks", tasks.ListTaskHandler)
 	mux.HandleFunc("POST /tasks", tasks.CreateTaskHandler)
