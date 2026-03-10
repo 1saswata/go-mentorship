@@ -142,7 +142,11 @@ func (ts *TaskServer) WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 	for {
 		_, p, err := conn.ReadMessage()
 		if err != nil {
-			slog.Error("Websocket error", "err", err)
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway) {
+				slog.Error("Websocket error", "err", err)
+			} else {
+				slog.Info("Websocket client disconnected cleanly.")
+			}
 			break
 		}
 		ts.H.broadcast <- p
