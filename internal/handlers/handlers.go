@@ -12,6 +12,12 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+type EventHub interface {
+	Broadcast([]byte)
+	Register(*websocket.Conn)
+	Unregister(*websocket.Conn)
+}
+
 type Store interface {
 	CreateTask(string, string) int
 	GetAllTasks() []store.Task
@@ -21,7 +27,7 @@ type Store interface {
 
 type TaskServer struct {
 	Store Store
-	H     *Hub
+	H     EventHub
 }
 
 type WSEvent struct {
@@ -59,6 +65,22 @@ func (h *Hub) Run() {
 	}
 }
 
+func (h *Hub) Broadcast(message []byte) {
+	h.broadcast <- message
+}
+
+func (h *Hub) Register(con *websocket.Conn) {
+	h.Lock()
+	h.clients[con] = true
+	h.Unlock()
+}
+
+func (h *Hub) Unregister(con *websocket.Conn) {
+	h.Lock()
+	delete(h.clients, con)
+	h.Unlock()
+}
+
 func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
 	_, _ = io.WriteString(w, "OK\n")
 }
@@ -79,7 +101,7 @@ func (ts *TaskServer) CreateTaskHandler(w http.ResponseWriter, r *http.Request) 
 		w.WriteHeader(http.StatusCreated)
 		e := WSEvent{Type: "task_created", Payload: t}
 		b, _ := json.Marshal(e)
-		ts.H.broadcast <- b
+		go ts.H.Broadcast(b)
 		_ = json.NewEncoder(w).Encode(t)
 	}
 }
@@ -113,7 +135,7 @@ func (ts *TaskServer) UpdateTaskHandler(w http.ResponseWriter, r *http.Request) 
 	}
 	e := WSEvent{Type: "task_updated", Payload: id}
 	b, _ := json.Marshal(e)
-	ts.H.broadcast <- b
+	go ts.H.Broadcast(b)
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -134,7 +156,7 @@ func (ts *TaskServer) DeleteTaskHandler(w http.ResponseWriter, r *http.Request) 
 	}
 	e := WSEvent{Type: "task_deleted", Payload: id}
 	b, _ := json.Marshal(e)
-	ts.H.broadcast <- b
+	go ts.H.Broadcast(b)
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -144,14 +166,10 @@ func (ts *TaskServer) WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	ts.H.Lock()
-	ts.H.clients[conn] = true
-	ts.H.Unlock()
+	ts.H.Register(conn)
 	defer func() {
 		_ = conn.Close()
-		ts.H.Lock()
-		delete(ts.H.clients, conn)
-		ts.H.Unlock()
+		ts.H.Unregister(conn)
 	}()
 	for {
 		_, p, err := conn.ReadMessage()
@@ -163,6 +181,6 @@ func (ts *TaskServer) WebSocketHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			break
 		}
-		ts.H.broadcast <- p
+		go ts.H.Broadcast(p)
 	}
 }

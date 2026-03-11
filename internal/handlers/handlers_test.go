@@ -9,18 +9,11 @@ import (
 	"testing"
 
 	"github.com/1saswata/go-mentorship/internal/store"
+	"github.com/gorilla/websocket"
 )
 
 type mockStore struct {
 	err error
-}
-
-func (m mockStore) CreateTask(name, status string) int {
-	if m.err == nil {
-		return 1
-	} else {
-		return -1
-	}
 }
 
 func (m mockStore) GetAllTasks() []store.Task {
@@ -33,6 +26,20 @@ func (m mockStore) UpdateTaskStatus(id int, status string) error {
 
 func (m mockStore) DeleteTask(id int) error {
 	return m.err
+}
+
+type mockHub struct{}
+
+func (m mockHub) Broadcast(message []byte)       {}
+func (m mockHub) Register(con *websocket.Conn)   {}
+func (m mockHub) Unregister(con *websocket.Conn) {}
+
+func (m mockStore) CreateTask(name, status string) int {
+	if m.err == nil {
+		return 1
+	} else {
+		return -1
+	}
 }
 
 func TestHealthCheckHandler(t *testing.T) {
@@ -55,7 +62,7 @@ func TestHealthCheckHandler(t *testing.T) {
 
 func TestListTaskHandler(t *testing.T) {
 	t.Run("OneTask", func(t *testing.T) {
-		server := TaskServer{Store: mockStore{}}
+		server := TaskServer{Store: mockStore{}, H: mockHub{}}
 		req := httptest.NewRequest(http.MethodGet, "/tasks", nil)
 		res := httptest.NewRecorder()
 		server.ListTaskHandler(res, req)
@@ -90,7 +97,7 @@ func TestCreateTaskHandler(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			server := TaskServer{Store: mockStore{err: tt.err}}
+			server := TaskServer{Store: mockStore{err: tt.err}, H: mockHub{}}
 			req := httptest.NewRequest(http.MethodPost, "/tasks",
 				strings.NewReader(tt.reqBody))
 			res := httptest.NewRecorder()
@@ -128,7 +135,7 @@ func TestUpdateTaskHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			server := TaskServer{Store: mockStore{err: tt.err}}
+			server := TaskServer{Store: mockStore{err: tt.err}, H: mockHub{}}
 			req := httptest.NewRequest(http.MethodPut, "/tasks",
 				strings.NewReader(tt.reqBody))
 			if tt.id != -1 {
@@ -162,7 +169,7 @@ func TestDeleteTaskHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			server := TaskServer{Store: mockStore{err: tt.err}}
+			server := TaskServer{Store: mockStore{err: tt.err}, H: mockHub{}}
 			req := httptest.NewRequest(http.MethodDelete, "/tasks", nil)
 			if tt.id != -1 {
 				req.SetPathValue("id", strconv.Itoa(tt.id))
