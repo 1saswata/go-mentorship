@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"log"
 	"log/slog"
 	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"syscall"
@@ -17,6 +19,9 @@ import (
 func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	slog.SetDefault(logger)
+	go func() {
+		log.Println(http.ListenAndServe(":6060", nil))
+	}()
 	db := InitDB()
 	defer func() { _ = db.Close() }()
 	mux := http.NewServeMux()
