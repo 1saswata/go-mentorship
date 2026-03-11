@@ -14,5 +14,5 @@ This is a self created go mentorship program where I go from beginner to interme
 
 ## Current Status
 
-* **Current Week:** 5
-* **Current Task:** The Broadcast Hub - Create a thread-safe Hub that registers clients and broadcasts incoming messages to all connected clients.
+* **Current Week:** 6
+* **Current Task:** Event-Driven REST - Modify your REST API handlers so that whenever a resource changes (Create, Update, Delete), the server broadcasts a JSON event to all connected WebSocket clients.

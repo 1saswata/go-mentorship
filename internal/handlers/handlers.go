@@ -24,6 +24,11 @@ type TaskServer struct {
 	H     *Hub
 }
 
+type WSEvent struct {
+	Type    string `json:"type"`
+	Payload any    `json:"payload"`
+}
+
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
@@ -72,6 +77,9 @@ func (ts *TaskServer) CreateTaskHandler(w http.ResponseWriter, r *http.Request) 
 		w.WriteHeader(http.StatusInternalServerError)
 	} else {
 		w.WriteHeader(http.StatusCreated)
+		e := WSEvent{Type: "task_created", Payload: t}
+		b, _ := json.Marshal(e)
+		ts.H.broadcast <- b
 		_ = json.NewEncoder(w).Encode(t)
 	}
 }
@@ -103,6 +111,9 @@ func (ts *TaskServer) UpdateTaskHandler(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	e := WSEvent{Type: "task_updated", Payload: id}
+	b, _ := json.Marshal(e)
+	ts.H.broadcast <- b
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -121,6 +132,9 @@ func (ts *TaskServer) DeleteTaskHandler(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	e := WSEvent{Type: "task_deleted", Payload: id}
+	b, _ := json.Marshal(e)
+	ts.H.broadcast <- b
 	w.WriteHeader(http.StatusNoContent)
 }
 
