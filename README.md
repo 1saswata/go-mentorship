@@ -15,4 +15,4 @@ This is a self created go mentorship program where I go from beginner to interme
 ## Current Status
 
 * **Current Week:** 6
-* **Current Task:** Event-Driven REST - Modify your REST API handlers so that whenever a resource changes (Create, Update, Delete), the server broadcasts a JSON event to all connected WebSocket clients.
+* **Current Task:** - (Completed)
